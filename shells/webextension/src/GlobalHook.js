@@ -10,30 +10,6 @@
  */
 'use strict';
 
-/* globals chrome */
-
-// The hook (__RAX_DEVTOOLS_GLOBAL_HOOK__) is now injected into the page
-// via chrome.scripting.executeScript from the background service worker.
-// This content script only listens for detection messages from the page
-// and forwards them to the background script.
-
-var lastDetectionResult;
-
-// Listen for detection messages from the page (posted by injectHook.js)
-window.addEventListener('message', function(evt) {
-  if (evt.source === window && evt.data && evt.data.source === 'react-devtools-detector') {
-    lastDetectionResult = {
-      hasDetectedReact: true,
-      reactBuildType: evt.data.reactBuildType,
-    };
-    chrome.runtime.sendMessage(lastDetectionResult);
-  }
-});
-
-// Replay last detection result on pageshow (for Firefox navigation)
-window.addEventListener('pageshow', function(evt) {
-  if (!lastDetectionResult || evt.target !== window.document) {
-    return;
-  }
-  chrome.runtime.sendMessage(lastDetectionResult);
-});
+// The hook is now injected via chrome.scripting.executeScript (MAIN world)
+// from background.js, which calls chrome.runtime.sendMessage directly.
+// This content script is no longer needed for detection relay.

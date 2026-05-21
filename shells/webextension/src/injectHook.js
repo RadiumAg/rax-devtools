@@ -6,11 +6,12 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- * This script is injected into the page via chrome.scripting.executeScript
- * (from the background service worker) to bypass page CSP restrictions.
- * It creates the __RAX_DEVTOOLS_GLOBAL_HOOK__ and sets up detection.
+ * Injected into the page via chrome.scripting.executeScript (MAIN world).
+ * Creates the devtools hook and notifies the background directly.
  */
 'use strict';
+
+/* global chrome */
 
 var installGlobalHook = require('../../../backend/installGlobalHook.js');
 
@@ -23,10 +24,14 @@ window.__RAX_DEVTOOLS_GLOBAL_HOOK__.nativeMap = Map;
 window.__RAX_DEVTOOLS_GLOBAL_HOOK__.nativeWeakMap = WeakMap;
 window.__RAX_DEVTOOLS_GLOBAL_HOOK__.nativeSet = Set;
 
-// Listen for renderer injection and notify the content script
+// Listen for renderer injection and notify background directly
 window.__RAX_DEVTOOLS_GLOBAL_HOOK__.on('renderer', function(evt) {
-  window.postMessage({
-    source: 'react-devtools-detector',
-    reactBuildType: evt.reactBuildType,
-  }, '*');
+  try {
+    chrome.runtime.sendMessage({
+      hasDetectedReact: true,
+      reactBuildType: evt.reactBuildType,
+    });
+  } catch (e) {
+    // Extension context may be invalidated on navigation
+  }
 });
