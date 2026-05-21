@@ -56,11 +56,11 @@ const build = async(tempPath, manifestPath) => {
   const webpackPath = join(__dirname, '..', '..', 'node_modules', '.bin', 'webpack');
   await exec(
     `${webpackPath} --config webpack.config.js --output-path ${binPath}`,
-    {cwd: __dirname, env: Object.assign({}, process.env, {NODE_ENV: 'production'})}
+    {cwd: __dirname, env: Object.assign({}, process.env, {NODE_ENV: 'production', NODE_OPTIONS: '--openssl-legacy-provider'})}
   );
   await exec(
     `${webpackPath} --config webpack.backend.js --output-path ${binPath}`,
-     {cwd: __dirname, env: Object.assign({}, process.env, {NODE_ENV: 'production'})}
+     {cwd: __dirname, env: Object.assign({}, process.env, {NODE_ENV: 'production', NODE_OPTIONS: '--openssl-legacy-provider'})}
   );
 
   // Make temp dir
