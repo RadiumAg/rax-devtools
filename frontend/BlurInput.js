@@ -11,7 +11,7 @@
 'use strict';
 
 var React = require('react');
-var Input = require('./Input');
+var Input = require('./Input'); 
 
 import type {DOMEvent, DOMNode} from './types';
 
