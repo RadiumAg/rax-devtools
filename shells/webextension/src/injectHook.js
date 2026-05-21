@@ -26,12 +26,14 @@ window.__RAX_DEVTOOLS_GLOBAL_HOOK__.nativeSet = Set;
 
 // Listen for renderer injection and notify background directly
 window.__RAX_DEVTOOLS_GLOBAL_HOOK__.on('renderer', function(evt) {
+  console.log('[Rax DevTools] Renderer detected:', evt.reactBuildType);
   try {
     chrome.runtime.sendMessage({
       hasDetectedReact: true,
       reactBuildType: evt.reactBuildType,
     });
+    console.log('[Rax DevTools] Message sent to background');
   } catch (e) {
-    // Extension context may be invalidated on navigation
+    console.log('[Rax DevTools] Failed to send message:', e);
   }
 });

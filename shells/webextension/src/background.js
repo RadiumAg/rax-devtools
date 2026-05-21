@@ -102,8 +102,10 @@ function setIconAndPopup(reactBuildType, tabId) {
 }
 
 chrome.runtime.onMessage.addListener((req, sender) => {
+  console.log('[Rax DevTools Background] Message received:', req, 'sender:', sender);
   if (req.hasDetectedReact && sender.tab) {
     var reactBuildType = req.reactBuildType;
+    console.log('[Rax DevTools Background] Setting icon for tab', sender.tab.id, 'type:', reactBuildType);
     setIconAndPopup(reactBuildType, sender.tab.id);
   }
 });
