@@ -51,6 +51,26 @@ function installContentScript(tabId: number) {
   });
 }
 
+// Inject the global hook into page's MAIN world via chrome.scripting API.
+// This bypasses page CSP restrictions that block <script src="chrome-extension://...">.
+function injectHookIntoPage(tabId: number) {
+  chrome.scripting.executeScript({
+    target: {tabId: tabId},
+    files: ['/build/injectHook.js'],
+    world: 'MAIN',
+    injectImmediately: true,
+  }).catch(function(err) {
+    // Ignore errors for tabs where we cannot inject (chrome://, etc.)
+  });
+}
+
+// Inject hook on every navigation so hook is available before Rax initializes
+chrome.webNavigation.onCommitted.addListener(function(details) {
+  if (details.frameId === 0) {
+    injectHookIntoPage(details.tabId);
+  }
+});
+
 function doublePipe(one, two) {
   one.onMessage.addListener(lOne);
   function lOne(message) {
@@ -87,10 +107,7 @@ function setIconAndPopup(reactBuildType, tabId) {
 }
 
 chrome.runtime.onMessage.addListener((req, sender) => {
-  console.log('[Rax DevTools Background] Message received:', req, 'sender:', sender);
   if (req.hasDetectedReact && sender.tab) {
-    var reactBuildType = req.reactBuildType;
-    console.log('[Rax DevTools Background] Setting icon for tab', sender.tab.id, 'type:', reactBuildType);
-    setIconAndPopup(reactBuildType, sender.tab.id);
+    setIconAndPopup(req.reactBuildType, sender.tab.id);
   }
 });

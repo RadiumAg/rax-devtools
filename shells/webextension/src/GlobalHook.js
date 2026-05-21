@@ -6,16 +6,23 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
+ * Content script that relays messages from the page's MAIN world
+ * (where injectHook.js runs) to the extension's background service worker.
+ *
  * @flow
  */
 'use strict';
 
 /* globals chrome */
 
-// Inject hook via <script src="chrome-extension://..."> which runs in the
-// page's world. This is allowed by the page's CSP because script-src 'self'
-// permits loading scripts from the extension's own origin.
-var script = document.createElement('script');
-script.src = chrome.runtime.getURL('build/injectHook.js');
-document.documentElement.appendChild(script);
-script.parentNode.removeChild(script);
+// Relay renderer detection messages from page (MAIN world) to background
+window.addEventListener('message', function(event) {
+  if (
+    event.source === window &&
+    event.data &&
+    event.data.source === 'rax-devtools-hook' &&
+    event.data.payload
+  ) {
+    chrome.runtime.sendMessage(event.data.payload);
+  }
+});
