@@ -108,8 +108,7 @@ function installGlobalHook(window: Object) {
           return 'unminified';
         }
         // Seems like we're using the production version.
-        // However, the branch above is Stack-only so this is 15 or earlier.
-        return 'outdated';
+        return 'production';
       }
     } catch (err) {
       // Weird environments may exist.

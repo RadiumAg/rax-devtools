@@ -13,8 +13,6 @@
 /* global chrome */
 var ports = {};
 
-var IS_FIREFOX = navigator.userAgent.indexOf('Firefox') >= 0;
-
 chrome.runtime.onConnect.addListener(function(port) {
   var tab = null;
   var name = null;
@@ -45,19 +43,21 @@ function isNumeric(str: string): boolean {
 }
 
 function installContentScript(tabId: number) {
-  chrome.tabs.executeScript(tabId, {file: '/build/contentScript.js'}, function() {
+  chrome.scripting.executeScript({
+    target: {tabId: tabId},
+    files: ['/build/contentScript.js'],
+  }).catch(function() {
+    // Tab may not be ready yet, ignore
   });
 }
 
 function doublePipe(one, two) {
   one.onMessage.addListener(lOne);
   function lOne(message) {
-    // console.log('dv -> rep', message);
     two.postMessage(message);
   }
   two.onMessage.addListener(lTwo);
   function lTwo(message) {
-    // console.log('rep -> dv', message);
     one.postMessage(message);
   }
   function shutdown() {
@@ -71,7 +71,7 @@ function doublePipe(one, two) {
 }
 
 function setIconAndPopup(reactBuildType, tabId) {
-  chrome.browserAction.setIcon({
+  chrome.action.setIcon({
     tabId: tabId,
     path: {
       '16': 'icons/16-' + reactBuildType + '.png',
@@ -80,42 +80,15 @@ function setIconAndPopup(reactBuildType, tabId) {
       '128': 'icons/128-' + reactBuildType + '.png',
     },
   });
-  chrome.browserAction.setPopup({
+  chrome.action.setPopup({
     tabId: tabId,
     popup: 'popups/' + reactBuildType + '.html',
   });
 }
 
-// Listen to URL changes on the active tab and reset the DevTools icon.
-// This prevents non-disabled icons from sticking in Firefox.
-// Don't listen to this event in Chrome though.
-// It fires more frequently, often after onMessage() has been called.
-if (IS_FIREFOX) {
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (tab.active && changeInfo.status === 'loading') {
-      setIconAndPopup('disabled', tabId);
-    }
-  });
-}
-
 chrome.runtime.onMessage.addListener((req, sender) => {
-  // This is sent from the hook content script.
-  // It tells us a renderer has attached.
   if (req.hasDetectedReact && sender.tab) {
-    // We use browserAction instead of pageAction because this lets us
-    // display a custom default popup when React is *not* detected.
-    // It is specified in the manifest.
     var reactBuildType = req.reactBuildType;
-    if (sender.url.indexOf('facebook.github.io/react') !== -1) {
-      // Cheat: We use the development version on the website because
-      // it is better for interactive examples. However we're going
-      // to get misguided bug reports if the extension highlights it
-      // as using the dev version. We're just going to special case
-      // our own documentation and cheat. It is acceptable to use dev
-      // version of React in React docs, but not in any other case.
-      reactBuildType = 'production';
-    }
-
     setIconAndPopup(reactBuildType, sender.tab.id);
   }
 });

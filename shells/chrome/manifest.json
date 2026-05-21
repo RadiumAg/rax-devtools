@@ -1,10 +1,10 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Rax Developer Tools",
   "description": "Adds Rax debugging tools to the Chrome Developer Tools.",
   "version": "3.6.0",
 
-  "minimum_chrome_version": "49",
+  "minimum_chrome_version": "109",
 
   "icons": {
     "16": "icons/16-production.png",
@@ -13,7 +13,7 @@
     "128": "icons/128-production.png"
   },
 
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "icons/16-disabled.png",
       "32": "icons/32-disabled.png",
@@ -26,15 +26,25 @@
 
   "devtools_page": "main.html",
 
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  "web_accessible_resources": [ "main.html", "panel.html", "build/backend.js"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "main.html", "panel.html", "build/backend.js" ],
+      "matches": [ "<all_urls>" ]
+    }
+  ],
 
   "background": {
-    "scripts": [ "build/background.js" ],
-    "persistent": false
+    "service_worker": "build/background.js"
   },
 
   "permissions": [
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
     "file:///*",
     "http://*/*",
     "https://*/*"
