@@ -22,6 +22,7 @@ module.exports = {
     background: './src/background.js',
     contentScript: './src/contentScript.js',
     inject: './src/GlobalHook.js',
+    injectHook: './src/injectHook.js',
     main: './src/main.js',
     panel: './src/panel.js',
   },

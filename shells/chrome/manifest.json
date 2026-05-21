@@ -31,7 +31,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [ "main.html", "panel.html", "build/backend.js" ],
+      "resources": [ "main.html", "panel.html", "build/backend.js", "build/injectHook.js" ],
       "matches": [ "<all_urls>" ]
     }
   ],
@@ -42,7 +42,8 @@
 
   "permissions": [
     "scripting",
-    "activeTab"
+    "activeTab",
+    "webNavigation"
   ],
   "host_permissions": [
     "file:///*",
