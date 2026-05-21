@@ -13,21 +13,16 @@
 /* global chrome */
 
 module.exports = function(scriptName: string, done: () => void) {
-  var src = `
-  // the prototype stuff is in case document.createElement has been modified
-  (function () {
-    var script = document.constructor.prototype.createElement.call(document, 'script');
-    script.src = "${scriptName}";
-    script.charset = "utf-8";
-    document.documentElement.appendChild(script);
-    script.parentNode.removeChild(script);
-  })()
-  `;
+  // Use chrome.scripting.executeScript via background to inject into MAIN world.
+  // This bypasses page CSP that blocks <script src="chrome-extension://...">.
+  var tabId = chrome.devtools.inspectedWindow.tabId;
+  // Extract relative path from full chrome-extension:// URL
+  var filePath = scriptName.replace(/^chrome-extension:\/\/[^/]+\//, '/');
 
-  chrome.devtools.inspectedWindow.eval(src, function(res, err) {
-    if (err) {
-      console.log(err);
+  chrome.runtime.sendMessage(
+    {type: 'inject-backend', tabId: tabId, filePath: filePath},
+    function() {
+      done();
     }
-    done();
-  });
+  );
 };

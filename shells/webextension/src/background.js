@@ -106,8 +106,23 @@ function setIconAndPopup(reactBuildType, tabId) {
   });
 }
 
-chrome.runtime.onMessage.addListener((req, sender) => {
+chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   if (req.hasDetectedReact && sender.tab) {
     setIconAndPopup(req.reactBuildType, sender.tab.id);
+  }
+
+  // Handle backend injection request from devtools panel
+  if (req.type === 'inject-backend') {
+    chrome.scripting.executeScript({
+      target: {tabId: req.tabId},
+      files: [req.filePath],
+      world: 'MAIN',
+    }).then(() => {
+      sendResponse({success: true});
+    }).catch((err) => {
+      console.error('[Rax DevTools] Failed to inject backend:', err);
+      sendResponse({success: false, error: err.message});
+    });
+    return true; // keep message channel open for async sendResponse
   }
 });
