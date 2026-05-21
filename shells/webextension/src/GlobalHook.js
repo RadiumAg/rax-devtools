@@ -10,6 +10,12 @@
  */
 'use strict';
 
-// The hook is now injected via chrome.scripting.executeScript (MAIN world)
-// from background.js, which calls chrome.runtime.sendMessage directly.
-// This content script is no longer needed for detection relay.
+/* globals chrome */
+
+// Inject hook via <script src="chrome-extension://..."> which runs in the
+// page's world. This is allowed by the page's CSP because script-src 'self'
+// permits loading scripts from the extension's own origin.
+var script = document.createElement('script');
+script.src = chrome.runtime.getURL('build/injectHook.js');
+document.documentElement.appendChild(script);
+script.parentNode.removeChild(script);

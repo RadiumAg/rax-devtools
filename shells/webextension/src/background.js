@@ -51,21 +51,6 @@ function installContentScript(tabId: number) {
   });
 }
 
-// Inject the hook into pages via chrome.scripting.executeScript.
-// This runs in the page's MAIN world, bypassing page CSP restrictions
-// that would block inline <script> elements.
-chrome.webNavigation.onCompleted.addListener(function(details) {
-  if (details.frameId === 0) {
-    chrome.scripting.executeScript({
-      target: {tabId: details.tabId, allFrames: false},
-      world: 'MAIN',
-      files: ['/build/injectHook.js'],
-    }).catch(function() {
-      // Ignore errors (e.g. on chrome:// pages)
-    });
-  }
-});
-
 function doublePipe(one, two) {
   one.onMessage.addListener(lOne);
   function lOne(message) {

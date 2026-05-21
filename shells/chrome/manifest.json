@@ -42,8 +42,7 @@
 
   "permissions": [
     "scripting",
-    "activeTab",
-    "webNavigation"
+    "activeTab"
   ],
   "host_permissions": [
     "file:///*",
