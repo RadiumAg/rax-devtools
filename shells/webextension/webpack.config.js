@@ -17,7 +17,8 @@ const __DEV__ = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   mode: __DEV__ ? 'development' : 'production',
-  devtool: __DEV__ ? 'cheap-module-eval-source-map' : false,
+  // Avoid eval-based devtool options that violate Chrome extension CSP
+  devtool: __DEV__ ? 'cheap-module-source-map' : false,
   entry: {
     background: './src/background.js',
     contentScript: './src/contentScript.js',
@@ -29,6 +30,9 @@ module.exports = {
   output: {
     path: __dirname + '/build',
     filename: '[name].js',
+    // Use 'self' instead of default 'window' to avoid Function("return this")()
+    // which violates Chrome extension CSP (no unsafe-eval)
+    globalObject: 'self',
   },
   plugins: __DEV__ ? [] : [
     // Ensure we get production React

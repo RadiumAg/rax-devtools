@@ -16,7 +16,7 @@ const __DEV__ = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   mode: __DEV__ ? 'development' : 'production',
-  devtool: __DEV__ ? 'cheap-module-eval-source-map' : false,
+  devtool: __DEV__ ? 'cheap-module-source-map' : false,
   entry: {
     backend: './src/backend.js',
   },
